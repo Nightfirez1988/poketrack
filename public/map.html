@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>PokeTrack</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<link rel="stylesheet" href="./style.css">	
+	<script
+		src="https://code.jquery.com/jquery-3.1.0.min.js"
+		integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s="
+		crossorigin="anonymous"
+	></script>
+	<script>
+
+	function showAllPokemon() {
+		console.log("showing Pokemon");
+		$.get('/sighting', function(data){
+			$('#output').html("");
+			for (var i = 0; i < data.length; i++) {
+				$('#output').append('<img class="pic" src="./images/pokeball_small.png"><p class="map">'+ data[i].pokemonId + " was seen in "+ data[i].locStr + '</p>');
+			}
+		},
+		'json'
+		);
+	}
+
+	function sendPokemon() {
+		console.log("sending Pokemon");
+		$.post(
+			'/sighting',
+			{
+				locStr: $('#locStr').val(),
+				pokemonId: $('#pokemonId').val()
+			},
+			function(data){
+				if (data == "success") {
+					showAllPokemon();
+				}
+			}
+		);
+	}
+
+	function filterSearch(){
+		console.log("filterPokemon");
+		if(!$('#city').val() && $('#pokeName').val()){
+			$.get('/sighting/id/'+ $('#pokeName').val(),
+				function(data){
+					$('#output').html("");
+					for (var i = 0; i < data.length; i++) {
+						$('#output').append('<img class="pic" src="./images/pokeball_small.png"><p class="map">'+ data[i].pokemonId + " was seen in "+ data[i].locStr + '</p>');
+					}	
+				}, "json"
+			);
+		} else if($('#city').val() && !$('#pokeName').val()){
+			$.get('/sighting/city/'+$('#city').val(),	
+				function(data){
+					$('#output').html("");
+					for (var i = 0; i < data.length; i++) {
+						$('#output').append('<img class="pic" src="./images/pokeball_small.png"><p class="map">'+ data[i].pokemonId + " was seen in "+ data[i].locStr + '</p>');
+					}					
+				}, "json"
+			);
+		} else if($('#city').val() && $('#pokeName').val()){
+			$.get('/sighting/search/'+$('#LocStr').val()+"/"+$('#pokemonId').val(),
+				function(data){
+					$('#output').html("");
+					for (var i = 0; i < data.length; i++) {
+						$('#output').append('<img class="pic" src="./images/pokeball_small.png"><p class="map">'+ data[i].pokemonId + " was seen in "+ data[i].locStr + '</p>');
+					}
+				}, "json"
+			);
+		}
+	}
+
+	$(document).ready(function() {
+		showAllPokemon();
+		$('#submit').click(sendPokemon);
+		$('#searchFilter').click(filterSearch);
+	});
+
+	setInterval(showAllPokemon, 60000);
+
+
+	</script>
+</head>
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-6 one_one"><h1>Add Pokemon</h1></div>
+			<div class="col-sm-6 one_two"><h1>Search Filters</h1></div>
+		</div>	
+		<div class="row two">
+			<div id="poke_description">Pokemon</div>
+			<input type="text" id="pokemonId">
+			<div id="loc_description">Location</div>
+			<input type="text" id="locStr">	
+			<input type="button" id="submit" value="Send Loc">
+			<div id="poke_search">Pokemon</div>
+			<input type="text" id="pokeName">
+			<div id="city_search">Location</div>
+			<input type="text" id="city">			
+			<input type="button" id="searchFilter" value="Filter Search">
+		</div>
+		<div class="row three">	
+			<div id="output"></div>
+		</div>
+		<!-- <img class="all" src="./images/pokemon_all.png"> -->	
+		<a class="logout_anchor" href="/logout"><button class="logout_button">Logout</button></a>
+	</div>
+</body>
+</html>
